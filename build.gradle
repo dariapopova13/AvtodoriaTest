@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group 'com.popova.avtodoria'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Avtodoria Test',
+                'Implementation-Version': version,
+                'Main-Class': 'com.popova.avtodoria.Main'
+    }
+    baseName = project.name
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+build.finalizedBy(fatJar)
+
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.3.1'
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6'
+ }

@@ -1,0 +1,60 @@
+
+JDBC URL тестовой БД:
+jdbc:postgresql://raja.db.elephantsql.com:5432/xdusdjpb?user=xdusdjpb&password=MrFFl3sRJfwo9YbGE0_RQFvjcW7xINYU
+
+host: 'raja.db.elephantsql.com'
+port: '5432'
+database: 'xdusdjpb'
+username: 'xdusdjpb'
+password: 'MrFFl3sRJfwo9YbGE0_RQFvjcW7xINYU'
+
+В ней уже сушествуют таблицы:
+
+-- samples
+CREATE TABLE samples(
+   id BIGSERIAL PRIMARY KEY,
+   creation_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+   sample INTEGER NOT NULL
+);
+
+-- processed samples
+CREATE TABLE processed_samples(
+   id BIGSERIAL PRIMARY KEY,
+   creation_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+   sample_id BIGINT REFERENCES samples (id),
+   thread_id INTEGER NOT NULL
+);
+
+Необходимо:
+
+1. Создать пул коннектов к БД (максимум в пуле коннектов должно быть не более 4).
+Можно использовать любые библиотеки дл создания пула dbcp2, hikaricp и т.д.
+
+2. Создать и запустить мастер-тред, который будет 10 раз
+осуществлять вставку в таблицу samples 10 записей. При вставке поле creation_timestamp
+должно содержать текущее время, поле sample - рандомное целое число до 100.
+
+3. Создать и запустить пул воркер-тредов, не менее 5,
+которые будут экспортировать записи из таблицы samples
+в таблицу processed_samples. При вставке в таблицу processed_samples,
+поле creation_timestamp должно содержать текущее время, sample_id должно
+содержать ID записи экпортируемой из таблицы samples, thread_id - ID потока,
+который должен быть уникальным для каждого.
+
+4. Воркер-треды должны опрашивать БД на наличие новых записей для экспорта
+с задержкой не более 500мсек после окончания предыдущей попытки.
+
+5. После того, как воркер-треды 7 раз подряд не нашли новых записей для экспорта, они прекращают свою работу.
+
+6. Множество записей, обрабатываемых каждым потоком, должно быть уникальным.
+
+7. Желательно, чтобы все вставки в таблицы осуществлять батчами.
+
+8. После завершения работы мастер-треда и воркер тредов необходимо вывести в консоль стастистику:
+* число записей из таблицы samples, экспортированных каждым тредом: "{thread_id} -> {COUNT(sample_id)}".
+* максимальное значение поля sample из таблицы samples, экспортированное каждым тредом: "{thread_id} -> {MAX(sample)}".
+
+9. Очистить таблицы samples, processed_samples.
+
+
+проект должен собираться через gradle в uberjar, для обращения к БД использовать нужно JDBC.
