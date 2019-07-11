@@ -23,7 +23,6 @@ public class InsertThread implements Runnable {
             e.printStackTrace();
             Thread.currentThread().interrupt();
         }
-
         System.out.println("Insert thread has ended its task.");
     }
 

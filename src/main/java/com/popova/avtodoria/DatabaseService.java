@@ -17,9 +17,7 @@ public class DatabaseService {
     private static HikariDataSource dataSource;
 
     static {
-//        config.setJdbcUrl("jdbc:postgresql://localhost:5432/avtodoriaTest");
-//        config.setUsername("admin");
-//        config.setPassword("qwerty");
+
         config.setJdbcUrl("jdbc:postgresql://raja.db.elephantsql.com:5432/xdusdjpb");
         config.setUsername("xdusdjpb");
         config.setPassword("MrFFl3sRJfwo9YbGE0_RQFvjcW7xINYU");

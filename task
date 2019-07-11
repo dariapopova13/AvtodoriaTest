@@ -56,5 +56,4 @@ CREATE TABLE processed_samples(
 
 9. Очистить таблицы samples, processed_samples.
 
-
 проект должен собираться через gradle в uberjar, для обращения к БД использовать нужно JDBC.
