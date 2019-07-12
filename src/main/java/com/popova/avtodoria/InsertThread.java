@@ -8,7 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class InsertThread implements Runnable {
 
-    private final static Logger logger = Logger.getLogger(InsertThread.class.getName());
+    private final static Logger logger = Logger.getLogger(InsertThread.class);
     private BlockingQueue<Long> idsToBeMoved;
 
     public InsertThread(BlockingQueue<Long> idsToBeMoved) {

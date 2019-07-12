@@ -14,7 +14,7 @@ import java.util.Random;
 public class DatabaseService {
 
     public static final int n = 10;
-    private final static Logger logger = Logger.getLogger(DatabaseService.class.getName());
+    private final static Logger logger = Logger.getLogger(DatabaseService.class);
     private static HikariConfig config = new HikariConfig();
     private static HikariDataSource dataSource;
 
@@ -66,7 +66,7 @@ public class DatabaseService {
             preparedStatement.execute();
             close(connection, preparedStatement);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ public class DatabaseService {
             printCount();
             printMax();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
         }
     }
 

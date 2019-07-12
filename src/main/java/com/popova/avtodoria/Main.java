@@ -1,16 +1,19 @@
 package com.popova.avtodoria;
 
+import org.apache.log4j.Logger;
+
 import java.util.concurrent.*;
 
 public class Main {
 
     public static final int POOL_SIZE = 6;
+    private static final Logger logger = Logger.getLogger(Main.class);
 
     public static void main(String[] args) {
         try {
             createThreadPool();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error("Error while creating a thread pool.", e);
         }
 
         DatabaseService.printStatistics();

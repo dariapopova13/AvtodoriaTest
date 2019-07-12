@@ -9,7 +9,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class MoveThread implements Runnable {
 
-    private final static Logger logger = Logger.getLogger(MoveThread.class.getName());
+    private final static Logger logger = Logger.getLogger(MoveThread.class);
     private BlockingQueue<Long> idsToBeMoved;
 
     public MoveThread(BlockingQueue<Long> idsToBeMoved) {
