@@ -1,7 +1,5 @@
 package com.popova.avtodoria;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.concurrent.*;
 
 public class Main {
@@ -24,7 +22,7 @@ public class Main {
 
         ExecutorService service = Executors.newFixedThreadPool(POOL_SIZE);
         service.execute(new InsertThread(idsToBeMoved));
-        for (int i = 0; i < POOL_SIZE-1; i++) {
+        for (int i = 0; i < POOL_SIZE - 1; i++) {
             service.execute(new MoveThread(idsToBeMoved));
         }
 

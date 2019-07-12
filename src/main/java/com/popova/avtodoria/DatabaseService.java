@@ -2,6 +2,7 @@ package com.popova.avtodoria;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.apache.log4j.Logger;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,23 +14,22 @@ import java.util.Random;
 public class DatabaseService {
 
     public static final int n = 10;
+    private final static Logger logger = Logger.getLogger(DatabaseService.class.getName());
     private static HikariConfig config = new HikariConfig();
     private static HikariDataSource dataSource;
 
     static {
-
-        config.setJdbcUrl("jdbc:postgresql://raja.db.elephantsql.com:5432/xdusdjpb");
-        config.setUsername("xdusdjpb");
-        config.setPassword("MrFFl3sRJfwo9YbGE0_RQFvjcW7xINYU");
+        config.setJdbcUrl("jdbc:postgresql://localhost:5432/avtodoriaTest");
+        config.setUsername("admin");
+        config.setPassword("qwerty");
+//        config.setJdbcUrl("jdbc:postgresql://raja.db.elephantsql.com:5432/xdusdjpb");
+//        config.setUsername("xdusdjpb");
+//        config.setPassword("MrFFl3sRJfwo9YbGE0_RQFvjcW7xINYU");
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         config.setMaximumPoolSize(4);
         dataSource = new HikariDataSource(config);
-    }
-
-    public static Connection getConnection() throws SQLException {
-        return dataSource.getConnection();
     }
 
     public static List<Long> insertIntoDatabase() throws SQLException {
@@ -49,10 +49,26 @@ public class DatabaseService {
         while (resultSet.next()) {
             ids.add(resultSet.getLong("id"));
         }
-        connection.close();
+        close(connection, preparedStatement, resultSet);
         return ids;
     }
 
+    public static Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
+    }
+
+    public static void clearTables() {
+        try {
+            Connection connection = getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    "delete from  processed_samples; delete from samples;"
+            );
+            preparedStatement.execute();
+            close(connection, preparedStatement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void moveDataInDatabase(List<Long> idsToBeMoved, long threadId) throws SQLException {
         Connection connection = getConnection();
@@ -67,12 +83,7 @@ public class DatabaseService {
             preparedStatement.addBatch();
         }
         preparedStatement.executeBatch();
-        connection.close();
-    }
-
-    private static int getRandomNumber() {
-        Random random = new Random();
-        return random.nextInt(100);
+        close(connection, preparedStatement);
     }
 
     public static void printStatistics() {
@@ -84,8 +95,23 @@ public class DatabaseService {
         }
     }
 
+    private static int getRandomNumber() {
+        Random random = new Random();
+        return random.nextInt(100);
+    }
+
+    private static void close(Connection connection, PreparedStatement preparedStatement,
+                              ResultSet resultSet) throws SQLException {
+        resultSet.close();
+        close(connection, preparedStatement);
+    }
+
+    private static void close(Connection connection, PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.close();
+        connection.close();
+    }
+
     private static void printCount() throws SQLException {
-        System.out.println("\nCount:");
         Connection connection = getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(
                 "select thread_id, count(*) as count_value  from processed_samples " +
@@ -95,15 +121,14 @@ public class DatabaseService {
         preparedStatement.executeQuery();
         ResultSet resultSet = preparedStatement.getResultSet();
         while (resultSet.next()) {
-            System.out.printf("Thread %s -> count: %s\n",
-                    resultSet.getLong("thread_id"),
-                    resultSet.getInt("count_value"));
+            long threadId = resultSet.getLong("thread_id");
+            int countValue = resultSet.getInt("count_value");
+            logger.info(String.format("Thread %s -> count: %s", threadId, countValue));
         }
-        connection.close();
+        close(connection, preparedStatement, resultSet);
     }
 
     private static void printMax() throws SQLException {
-        System.out.println("\nMax:");
         Connection connection = getConnection();
         PreparedStatement preparedStatement = connection.prepareStatement(
                 "select thread_id, max(sample) as max_value from processed_samples ps, samples s " +
@@ -112,25 +137,11 @@ public class DatabaseService {
         preparedStatement.executeQuery();
         ResultSet resultSet = preparedStatement.getResultSet();
         while (resultSet.next()) {
-            System.out.printf("Thread %s -> max: %s\n",
-                    resultSet.getLong("thread_id"),
-                    resultSet.getInt("max_value"));
+            long threadId = resultSet.getLong("thread_id");
+            int maxValue = resultSet.getInt("max_value");
+            logger.info(String.format("Thread %s -> max: %s", threadId, maxValue));
         }
-        connection.close();
-    }
-
-    public static void clearTables() {
-        try {
-            Connection connection = getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "delete  from  processed_samples; delete from samples;"
-            );
-
-            preparedStatement.execute();
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        close(connection, preparedStatement, resultSet);
     }
 
 }
